@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventskalender 💕</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: linear-gradient(to bottom, #f8f6f4 0%, #e8e4df 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8em;
+            animation: fall linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 400;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-family: 'Raleway', sans-serif;
+            color: #6b7f72;
+            font-size: 0.95em;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 25px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .door {
+            background: #ffffff;
+            border: 1px solid #d4cfc7;
+            border-radius: 8px;
+            padding: 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .door:hover:not(.locked) {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(45, 74, 62, 0.15);
+            border-color: #a89968;
+        }
+
+        .door.locked {
+            background: #f5f3f0;
+            cursor: not-allowed;
+            opacity: 0.5;
+            border-color: #e8e4df;
+        }
+
+        .door.opened {
+            background: #fafaf9;
+            border-color: #a89968;
+        }
+
+        .door-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #2d4a3e;
+        }
+
+        .door-icon {
+            font-size: 1.2em;
+            margin-top: 8px;
+            opacity: 0.6;
+        }
+
+        .available {
+            animation: subtlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 74, 62, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 60px 50px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalAppear 0.4s ease;
+            border: 1px solid #d4cfc7;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #6b7f72;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f5f3f0;
+            color: #2d4a3e;
+        }
+
+        .content-title {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .content-body {
+            font-family: 'Raleway', sans-serif;
+            color: #4a4a4a;
+            font-size: 1.05em;
+            line-height: 1.8;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .content-image {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+            margin: 30px auto 20px;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .song-player {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f6f4;
+            border-radius: 8px;
+            border: 1px solid #e8e4df;
+        }
+
+        .song-player h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4em;
+            color: #2d4a3e;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .song-player a {
+            color: #2d4a3e;
+            text-decoration: none;
+            font-weight: 400;
+            border-bottom: 1px solid #a89968;
+            padding-bottom: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .song-player a:hover {
+            color: #a89968;
+            border-bottom-color: #2d4a3e;
+        }
+
+        .heart {
+            position: fixed;
+            font-size: 1.5em;
+            color: #a89968;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) rotate(180deg);
+            }
+        }
+
+        .countdown-section {
+            margin-top: 80px;
+            padding-top: 60px;
+            border-top: 1px solid #d4cfc7;
+        }
+
+        .countdown-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .countdown-box {
+            background: #ffffff;
+            border: 1px solid #d4cfc7;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .countdown-title {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .countdown-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+
+        .time-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #2d4a3e;
+            line-height: 1;
+        }
+
+        .time-label {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.75em;
+            color: #6b7f72;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+                letter-spacing: 2px;
+            }
+            .subtitle {
+                font-size: 0.8em;
+                letter-spacing: 2px;
+            }
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            }
+            .door-number {
+                font-size: 2em;
+            }
+            .modal-content {
+                padding: 40px 30px;
+            }
+            .countdown-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .time-number {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ADVENTSKALENDER</h1>
+            <p class="subtitle">Für Dich</p>
+        </header>
+
+        <div class="calendar-grid" id="calendar"></div>
+
+        <div class="countdown-section">
+            <div class="countdown-container">
+                <div class="countdown-box">
+                    <h3 class="countdown-title">Geburtstag</h3>
+                    <div class="countdown-display" id="countdown1">
+                        <div class="time-unit">
+                            <span class="time-number" id="days1">0</span>
+                            <span class="time-label">Tage</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="hours1">0</span>
+                            <span class="time-label">Stunden</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="minutes1">0</span>
+                            <span class="time-label">Minuten</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="countdown-box">
+                    <h3 class="countdown-title">Treffen</h3>
+                    <div class="countdown-display" id="countdown2">
+                        <div class="time-unit">
+                            <span class="time-number" id="days2">0</span>
+                            <span class="time-label">Tage</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="hours2">0</span>
+                            <span class="time-label">Stunden</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="minutes2">0</span>
+                            <span class="time-label">Minuten</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="countdown-box">
+                    <h3 class="countdown-title">Weihnachten</h3>
+                    <div class="countdown-display" id="countdown3">
+                        <div class="time-unit">
+                            <span class="time-number" id="days3">0</span>
+                            <span class="time-label">Tage</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="hours3">0</span>
+                            <span class="time-label">Stunden</span>
+                        </div>
+                        <div class="time-unit">
+                            <span class="time-number" id="minutes3">0</span>
+                            <span class="time-label">Minuten</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <h2 class="content-title" id="contentTitle"></h2>
+            <div class="content-body" id="contentBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const content = {
+            1: {
+                type: 'message',
+                title: 'Tag 1',
+                text: 'Hallo Henni heute ist der erste Tag von dem Kalender du kannst jetzt jeden Tag ein Türchen öffnen ich hoffe das klappt alles. Ich verate noch nicht zu viel hihih. Ich hab dich ganz dolle lieb henni und ich freu mich schon mit dir über den Weihnachtsmarkt zu gehen wenn du in München bist. Aber jetzt höre ich auf. Ich hab dich ganz dolle lieb.'
+            },
+            2: {
+                type: 'message',
+                title: 'Tag 2',
+                text: 'Jetzt ist schon wieder ein Tag vergangen und wir sind noch näher uns zu sehen das ist sooooo toll yippi. Ich wollte dir mal sagen wie toll du bist also wie unfassbar toll du bist so alles an dir ich liebe einefach alles, wie du bist, wie du aussiehst, wie du denkst, einfach alles und alles und ich kann es noch gar nicht abwarten dich wieder sooo bald zu sehen. Hab ein schönen Tag mein Schatz bis morgen. Hab dich lieb.' 
+            },
+            3: {
+                type: 'song',
+                title: 'Tag 3',
+                text: 'Heute mal ein Lied was mich immer an dich erinnert. Was das wohl ist? Vielicht siehst du es wenn du auf den Link klickst :). Das ist sooooo sher unser Lied und wenn wir heiraten währe zu 100% das unser Lied am Ende.',
+                songUrl: 'https://www.youtube.com/watch?v=b_CpWmkhwq0',
+                songName: 'Unser Lied'
+            },
+            4: {
+                type: 'image',
+                title: 'Tag 4',
+                text: 'Omg ich liebe diese Foto von uns. Ich liebe es einfach sooooo sher mit dir auf Sylt zu sein und diese Bild erinnert mich immer an diese tolle und schöne Zeit. PS:Du siehst auf dem Bild so süß und nett aus :).',
+                imageUrl: 'henrike/foto1.heic'
+            },
+            5: {
+                type: 'message',
+                title: 'Tag 5',
+                text: 'Ich bin mir nicht ganz sicher aber ich galaube heute kommst du. OMG. JAAAAA. Das ist sooooo toll ich freu mich schon soooooo sehr wenn du kommst. Wenn ich mir eine Geburtstagsgeschenk wünschen könnte dann währe es mit dir für immer zusammen sein :). Wenn du mir das schenkst währer ich der Glücklichster Mensch der ganzen Welt <3.'
+            },
+            6: {
+                type: 'message',
+                title: 'Tag 6',
+                text: 'Ich weiß gar nicht was ich schreiben soll, weil du bist ja bei mir und das ist das aller aller tollste. Deshalb wenn du das ließt hast du eine Massage frei.'
+            },
+            7: {
+                type: 'song',
+                title: 'Tag 7',
+                text: 'Hallo ein neuese Lied für henni. Diese Lied hab ich früher immer gehört wenn ich ich traurig war und dich vermisst habe. Das war so eine harte zeit am Annfang aber irgenwie hat mir das Lied dann immer voll geholfen',
+                songUrl: 'https://www.youtube.com/watch?v=bc3w27ZSTMI',
+                songName: 'Immmer bei vermissen'
+            },
+            8: {
+                type: 'image',
+                title: 'Tag 8',
+                text: 'Das Bild liebe ich auch sooooo sehr. Das war sooooooooo ein toller Tag mit dir. Ich liebe es mit dir Zeit zu verbringen. Du bist das tollste was mir je passiert ist. Und das Bild erinnert mich an die Zeit.',
+                imageUrl: 'henrike/foto2.heic'
+            },
+            9: {
+                type: 'message',
+                title: 'Tag 9',
+                text: 'Erst mal viel glück mit Mathe morgen :). Ich wollte dir mal sagen wie toll ich an dir finde wie schnell du Sachen verstehts. Es gibt niemand dem ich so geren Mathe erkläre wie dir das ist immer so toll und das macht mir sooooooo unenedlich dolle Spaß, deshalb wenn du heute hilfe brauchst ruf einfach an;).'
+            },
+            10: {
+                type: 'message',
+                title: 'Tag 10',
+                text: 'Viel Glück dir mit Mathe heute du schaffst das alles richtig richtig guz das weiß ich und ich denke ganz ganz feste an dich henni <3. Ich hab dich ganz ganz dolle lieb ganz ganz viel glück heute. Wenn du magst nimm den hasen mit der passt auf dich auf und bringt dir ganz viel Glück.'
+            },
+            11: {
+                type: 'song',
+                title: 'Tag 11',
+                text: 'Das bist so sher du irgenwie hahahh. Ich weiß nicht aber das Lied hat mir immer so spaß gemacht zu hören weil das mich so sehr an dich erinnert hat und immer noch tut.',
+                songUrl: 'https://www.youtube.com/watch?v=IdneKLhsWOQ',
+                songName: 'Für Dich'
+            },
+            12: {
+                type: 'image',
+                title: 'Tag 12',
+                text: 'Natürlcih darf auch Paul nicht feheln :). Deshalb habe ich einfach mal das süßeste Bild von dir und im genommen.',
+                imageUrl: 'henrike/foto3.heic'
+            },
+            13: {
+                type: 'message',
+                title: 'Tag 13',
+                text: 'Ist heute Freitag der 13 ich hoffe nicht. Aber Gott sei dank glückgehabt ist nicht ist Samsatg der 13. Puuuu das war echt kanpp. Da fällt mir gerade auf hast du nicht in 3 Tagen Geburtstag. Bin mir nicht ganz sicher aber ich glaube schon. OMG das ist ja sooooooo toll ich glaube ich habe schon paar schöne Gesncken ich hoffe du freust dich und ich hoffe du hast heute eine schönen Tag. Ich hab dich lieb <3.'
+            },
+            14: {
+                type: 'message',
+                title: 'Tag 14',
+                text: 'Jetzt sind es nur noch 2 Tage. Da fällt mir eine das wir ja auch zwei Leute sind. Naja übergnag so mittel, egal. Ich wollte dir mal sagen wie sehr ich mich bei dir Zuhause fühle wie schön es immer ist mit dir zusammen zu sein, wie glücklich mich es emacht mit dir zu kuscheln das ist immer sooooooo toll du weißt gar nicht wie sehr ich das toll finde. Danke das ich dich habe <3.'
+            },
+            15: {
+                type: 'song',
+                title: 'Tag 15',
+                text: 'Ein neuner Song. Diese Lied hast du mir gezeigt und irgewie hat mir das immer wieder aus ganz schwierigen Zeiten geholfen. Dafür bin ich dir so dankbar. Ich hab das immer gehört im Flieger als ich gefolgen bin und ich war so traurig.',
+                songUrl: 'https://www.youtube.com/watch?v=-BjZmE2gtdo',
+                songName: 'Überraschung'
+            },
+            16: {
+                type: 'image',
+                title: 'Tag 16',
+                text: 'Weil heute dein Geburtstag ist bekommst du natürlich was. Nur was gute frage.',
+                imageUrl: 'bilder/foto4.jpg'
+            },
+            17: {
+                type: 'message',
+                title: 'Tag 17',
+                text: 'Ich hoffe dein Geburtstag war richtig schön und du hast richtig schöne Sachen bekommen das würde mich so freuen für dich aber wirst du eh. Jetzt werden es immer weniger Tage bis wir uns endlich sehen. Ich kann es jetzt langsam gar nicht mehr abwarten bis es endlich wieder passiert. :)'
+            },
+            18: {
+                type: 'message',
+                title: 'Tag 18',
+                text: 'Ganz ganz vile glück dir heute in Spanisch du schaffst das natürlich da mach ich mir gar keine sorgen es gibt keinen Grund warum nicht. Ich hab dich ganz ganz dolle lieb und denke ganz ganz feste an dich. Du schaffst das <3. Vieliecht hilft das, wir treffen uns einfach schon morgen yippi das ist soooooooooooooooo toll henni ich freu mich sooooooooooo sehr <3.'
+            },
+            19: {
+                type: 'message',
+                title: 'Tag 19',
+                text: 'Yipppppppppppiiiiiiiiiiiiiiiiiiiii. Heute, heute, heute. das ist soooooo toll. Viel Glück dir bei Erdkunde du schaffst das und dann endlich hast du Ferien das ist sooooooo toll. Ich freu mich sooooooooooooooooooo unendlich sehr dich heute wieder zu sehen das kannst du dir gar nicht vorstellen, das ist soooooooooooo toll henni <3.'
+            },
+            20: {
+                type: 'image',
+                title: 'Tag 20',
+                text: 'Heute wieder ein Bild, ich freu mich schon soooooo sher wenn wir wieder da sind und spazieren gehen',
+                imageUrl: 'henrike/foto5.heic'
+            },
+            21: {
+                type: 'song',
+                title: 'Tag 21',
+                text: 'Diese Lied bedeutet mir so viel weil wir beide zu gleichen Zeit das Lied endeckt haben und irgenwie war das in einer Zeit wo nicht alles immer gut war und doch waren wir verbunden.',
+                songUrl: 'https://www.youtube.com/watch?v=cW8VLC9nnTo',
+                songName: 'Auch wenn es hart ist'
+            },
+            22: {
+                type: 'message',
+                title: 'Tag 22',
+                text: 'Ich will heute gar nicht fahren das macht mich voll traurig. Irgenwie verrückt ich schreib das jetzt und weiß das es so sein wird. Naja noch bin ich hoffentlich bei dir deshalb drück mich vielleicht mal kurz ganz fest.'
+            },
+            23: {
+                type: 'song',
+                title: 'Tag 23',
+                text: 'Ich finde das ist voll ein schönes Lied und es erinnert mich immer an unsere anfangszeit kurz bevor wir uns getroffen haben zum ersten mal.',
+                songUrl: 'https://www.youtube.com/watch?v=MoN9ql6Yymw',
+                songName: 'Unser Anfang'
+            },
+            24: {
+                type: 'message',
+                title: 'Tag 24',
+                text: 'Ganz ganz schöne Weihnachten, henrike. Ich hoffe du hattest eine große freude mit dem Kalender und er hat dir hin und wieder ein lächeln ins Gesicht gezaubert. Du bist es immer wert du bist so ein guter und erhlicher Mensch und mir hat das so Spaß gemacht den Kalender zu erstellen. Hab einen ganz schönen Tag mit deiner Familie und lass dich ganz reich beschenken du bist es wert. Ganz ganz dicker Kuss dein Vali <3.'
+            }
+        };
+
+        function createSnowflakes() {
+            setInterval(() => {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.innerHTML = '❄';
+                snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.opacity = Math.random() * 0.5;
+                snowflake.style.fontSize = (Math.random() * 8 + 8) + 'px';
+                document.body.appendChild(snowflake);
+
+                setTimeout(() => {
+                    snowflake.remove();
+                }, 5000);
+            }, 300);
+        }
+
+        function createHearts(x, y) {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    heart.innerHTML = '♥';
+                    heart.style.left = (x - 20 + Math.random() * 40) + 'px';
+                    heart.style.top = y + 'px';
+                    heart.style.animationDelay = (Math.random() * 0.2) + 's';
+                    document.body.appendChild(heart);
+
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 2000);
+                }, i * 80);
+            }
+        }
+
+        function getCurrentDay() {
+            // TESTMODUS: Alle Türchen freigeschaltet
+            return 0;
+            
+            // Für den echten Kalender später auskommentieren und folgendes verwenden:
+            // const now = new Date();
+            // if (now.getMonth() === 11 && now.getDate() <= 24) {
+            //     return now.getDate();
+            // }
+            // return 0;
+        }
+
+        function createCalendar() {
+            const calendar = document.getElementById('calendar');
+            const currentDay = getCurrentDay();
+            const openedDoors = JSON.parse(localStorage.getItem('openedDoors') || '[]');
+
+            for (let i = 1; i <= 24; i++) {
+                const door = document.createElement('div');
+                door.classList.add('door');
+                
+                if (i > currentDay) {
+                    door.classList.add('locked');
+                    door.innerHTML = `
+                        <div class="door-number">${i}</div>
+                        <div class="door-icon">♡</div>
+                    `;
+                } else if (openedDoors.includes(i)) {
+                    door.classList.add('opened');
+                    door.innerHTML = `
+                        <div class="door-number">${i}</div>
+                        <div class="door-icon">✓</div>
+                    `;
+                } else {
+                    door.classList.add('available');
+                    door.innerHTML = `
+                        <div class="door-number">${i}</div>
+                        <div class="door-icon">♥</div>
+                    `;
+                }
+
+                door.addEventListener('click', (e) => openDoor(i, e));
+                calendar.appendChild(door);
+            }
+        }
+
+        function openDoor(day, event) {
+            const currentDay = getCurrentDay();
+            
+            if (day > currentDay) {
+                alert('Sorry du musst leider noch warten :)');
+                return;
+            }
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            createHearts(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+            const openedDoors = JSON.parse(localStorage.getItem('openedDoors') || '[]');
+            if (!openedDoors.includes(day)) {
+                openedDoors.push(day);
+                localStorage.setItem('openedDoors', JSON.stringify(openedDoors));
+            }
+
+            setTimeout(() => {
+                showContent(day);
+            }, 400);
+
+            event.currentTarget.classList.remove('available');
+            event.currentTarget.classList.add('opened');
+            event.currentTarget.querySelector('.door-icon').textContent = '✓';
+        }
+
+        function showContent(day) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('contentTitle');
+            const body = document.getElementById('contentBody');
+            const data = content[day];
+
+            title.textContent = data.title;
+
+            if (data.type === 'message') {
+                body.innerHTML = `<p>${data.text}</p>`;
+            } else if (data.type === 'image') {
+                body.innerHTML = `
+                    <p>${data.text}</p>
+                    <img src="${data.imageUrl}" alt="Bild" class="content-image">
+                `;
+            } else if (data.type === 'song') {
+                body.innerHTML = `
+                    <p>${data.text}</p>
+                    <div class="song-player">
+                        <h3>${data.songName || 'Musik'}</h3>
+                        <p><a href="${data.songUrl}" target="_blank">Jetzt anhören →</a></p>
+                    </div>
+                `;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        function startCountdowns() {
+            const countdowns = [
+                { id: 1, date: new Date('2025-12-16T00:00:00') },
+                { id: 2, date: new Date('2025-12-19T18:55:00') },
+                { id: 3, date: new Date('2025-12-24T00:00:00') }
+            ];
+
+            function updateCountdowns() {
+                const now = new Date();
+
+                countdowns.forEach(countdown => {
+                    const difference = countdown.date - now;
+
+                    if (difference > 0) {
+                        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+
+                        document.getElementById(`days${countdown.id}`).textContent = days;
+                        document.getElementById(`hours${countdown.id}`).textContent = hours;
+                        document.getElementById(`minutes${countdown.id}`).textContent = minutes;
+                    } else {
+                        document.getElementById(`days${countdown.id}`).textContent = '0';
+                        document.getElementById(`hours${countdown.id}`).textContent = '0';
+                        document.getElementById(`minutes${countdown.id}`).textContent = '0';
+                    }
+                });
+            }
+
+            updateCountdowns();
+            setInterval(updateCountdowns, 1000);
+        }
+
+        createSnowflakes();
+        createCalendar();
+        startCountdowns();
+    </script>
+</body>
+</html>

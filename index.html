@@ -300,6 +300,12 @@
             padding: 30px 20px;
             text-align: center;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .countdown-box:active {
+            transform: scale(0.98);
         }
 
         .countdown-title {
@@ -741,6 +747,21 @@
             }
         });
 
+        // Geheime Kombination: 1-4-6
+        let secretClicks = [0, 0, 0];
+        const secretCode = [1, 4, 6];
+
+        function checkSecretCode() {
+            if (secretClicks[0] === secretCode[0] && 
+                secretClicks[1] === secretCode[1] && 
+                secretClicks[2] === secretCode[2]) {
+                createHearts(window.innerWidth / 2, window.innerHeight / 2);
+                setTimeout(() => {
+                    window.location.href = 'spiel.html';
+                }, 800);
+            }
+        }
+
         function startCountdowns() {
             const countdowns = [
                 { id: 1, date: new Date('2025-12-16T00:00:00') },
@@ -769,6 +790,14 @@
                     }
                 });
             }
+
+            // Klick-Events für geheime Kombination hinzufügen
+            document.querySelectorAll('.countdown-box').forEach((box, index) => {
+                box.addEventListener('click', () => {
+                    secretClicks[index]++;
+                    checkSecretCode();
+                });
+            });
 
             updateCountdowns();
             setInterval(updateCountdowns, 1000);

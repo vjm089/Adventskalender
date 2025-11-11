@@ -190,7 +190,7 @@
     <div class="game-container">
       <div class="game-header">
         <div class="game-score">Score: <span id="score">0</span></div>
-        <div class="game-timer">Zeit: <span id="timer">60</span>s</div>
+        <div class="game-timer">Zeit: <span id="timer">35</span>s</div>
       </div>
       <div class="game-area" id="gameArea">
         <div class="basket" id="basket">🧺</div>
@@ -210,6 +210,7 @@
     let gameInterval;
     let heartInterval;
     let gameActive = false;
+    let winCount = 0; // <- neue Variable für aufeinanderfolgende Siege
 
     function startGame() {
       document.getElementById('gameModal').classList.add('active');
@@ -313,14 +314,24 @@
       clearInterval(heartInterval);
 
       document.getElementById('finalScore').textContent = gameScore + ' Punkte';
+
       if (gameScore >= 50) {
-        document.getElementById('resultTitle').textContent = 'Yippi';
-        document.getElementById('resultMessage').innerHTML =
-          'Ein Gutschein für dich. Wir machen was du willst für einen Tag ❤️';
+        winCount++;
+        if (winCount < 3) {
+          document.getElementById('resultTitle').textContent = 'Yippi';
+          document.getElementById('resultMessage').innerHTML =
+            'Die Runde gewonnen ❤️. <strong>' + winCount + '/3</strong> Siege. Du schaffst das :)';
+        } else {
+          document.getElementById('resultTitle').textContent = 'Yippiii';
+          document.getElementById('resultMessage').innerHTML =
+            'Du hast gewonnen. Du bekommst einen Gutschein einen Tag lang machen wir nur was du willst ❤️';
+          winCount = 0; // zurücksetzen für spätere Spiele
+        }
       } else {
         document.getElementById('resultTitle').textContent = '❤️‍🩹';
         document.getElementById('resultMessage').innerHTML =
-          'Sorrry ' + gameScore + ' Punkte reichen noch nicht';
+          'Sorry ' + gameScore + ' Punkte sind noch genug. Noch mal von vorne';
+        winCount = 0;
       }
 
       document.getElementById('gameResult').classList.add('active');

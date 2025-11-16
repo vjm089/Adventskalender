@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Henni's Endless Journey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: linear-gradient(to bottom, #f8f6f4 0%, #e8e4df 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid #d4cfc7;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reset-btn {
+            font-family: 'Raleway', sans-serif;
+            background: #8b7355;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background: #6b5845;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7em;
+            color: #6b7f72;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3em;
+            color: #2d4a3e;
+            font-weight: 600;
+        }
+
+        #gameCanvas {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e8e4df;
+            border: 2px solid #d4cfc7;
+            border-radius: 8px;
+            max-width: 100%;
+            max-height: calc(100vh - 90px);
+            cursor: pointer;
+        }
+
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            border: 1px solid #d4cfc7;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 200;
+            max-width: 90%;
+        }
+
+        .game-over.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .game-over h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .game-over p {
+            color: #6b7f72;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .game-over .points {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5em;
+            color: #a89968;
+            margin: 20px 0;
+        }
+
+        .game-over button {
+            font-family: 'Raleway', sans-serif;
+            background: #2d4a3e;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .game-over button:hover {
+            background: #3d5a4e;
+        }
+
+        .victory {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 50px 40px;
+            border-radius: 12px;
+            border: 2px solid #a89968;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 300;
+            max-width: 90%;
+        }
+
+        .victory.active {
+            display: block;
+            animation: victoryAppear 0.5s ease;
+        }
+
+        @keyframes victoryAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .victory h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .victory .emoji {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+
+        .victory p {
+            color: #6b7f72;
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .victory .reward {
+            background: #f8f6f4;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #a89968;
+            margin: 20px 0;
+        }
+
+        .victory .reward-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8em;
+            color: #a89968;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d4cfc7;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-label {
+            font-size: 0.8em;
+            color: #6b7f72;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: #e8e4df;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2d4a3e, #a89968);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9em;
+            color: #2d4a3e;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="reset-btn" onclick="resetProgress()">Fortschritt zurücksetzen</button>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Session</div>
+                <div class="stat-value" id="sessionScore">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Gesamt</div>
+                <div class="stat-value" id="totalScore">0</div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="progress-bar">
+        <div class="progress-label">Fortschritt zum Ziel</div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 / 500.000</div>
+    </div>
+
+    <div class="instructions" id="instructions">
+        <h2>Willkommen! 🎮</h2>
+        <p><strong>Ziel:</strong> Sammle 500.000 Punkte!</p>
+        <p><strong>Steuerung:</strong></p>
+        <p>🖱️ <strong>Desktop:</strong> Pfeiltasten</p>
+        <p>📱 <strong>Mobile:</strong> Wischen in gewünschte Richtung</p>
+        <p class="controls-hint">Weiche den Schneeflocken ❄ aus und sammle Herzen ♥</p>
+        <button onclick="startGame()">Spiel starten</button>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>Game Over</h2>
+        <p>Session Punkte:</p>
+        <div class="points" id="sessionPoints">0</div>
+        <p id="totalPoints">Gesamt: 0</p>
+        <button onclick="restartGame()">Nochmal versuchen</button>
+    </div>
+
+    <div class="victory" id="victory">
+        <h2>🎉 Gewonnen! 🎉</h2>
+        <div class="emoji">🍽️</div>
+        <p>Du hast es geschafft!</p>
+        <p>500.000 Punkte erreicht!</p>
+        <div class="reward">
+            <div class="reward-text">Ein Essen gehen auf mich! ♥</div>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9em;">Du hast dir das wirklich verdient ♥</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Canvas-Größe anpassen
+        function resizeCanvas() {
+            const maxWidth = Math.min(window.innerWidth - 40, 400);
+            const maxHeight = window.innerHeight - 110;
+            canvas.width = maxWidth;
+            canvas.height = Math.min(maxHeight, maxWidth * 1.5);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Spielkonstanten
+        let CELL_SIZE, ROWS;
+        const TARGET_SCORE = 500000;
+
+        function updateGameDimensions() {
+            CELL_SIZE = canvas.width / 8;
+            ROWS = Math.floor(canvas.height / CELL_SIZE);
+        }
+        updateGameDimensions();
+
+        // Spielzustand
+        let player = { x: 4, y: 0 };
+        let score = 0;
+        let totalScore = 0;
+        let lanes = [];
+        let hearts = [];
+        let gameRunning = false;
+        let gameStarted = false;
+        let distanceTraveled = 0;
+        let cameraOffsetY = 0;
+        let targetCameraY = 0;
+        let rowCounter = 0;
+
+        // LocalStorage sicher laden
+        function loadTotalScore() {
+            try {
+                const saved = localStorage.getItem('henniTotalScore');
+                return saved ? parseInt(saved) : 0;
+            } catch (e) {
+                console.warn('LocalStorage nicht verfügbar:', e);
+                return 0;
+            }
+        }
+
+        function saveTotalScore() {
+            try {
+                localStorage.setItem('henniTotalScore', totalScore);
+            } catch (e) {
+                console.warn('Konnte nicht speichern:', e);
+            }
+        }
+
+        totalScore = loadTotalScore();
+
+        // Touch-Steuerung verbessert
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const MIN_SWIPE_DISTANCE = 40;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!gameRunning) return;
+
+            const touch = e.changedTouches[0];
+            const touchEndX = touch.clientX;
+            const touchEndY = touch.clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+            
+            if (absDx > absDy && absDx > MIN_SWIPE_DISTANCE) {
+                movePlayer(dx > 0 ? 1 : -1, 0);
+            } else if (absDy > MIN_SWIPE_DISTANCE) {
+                movePlayer(0, dy < 0 ? -1 : 1);
+            }
+        }, { passive: false });
+
+        // Tastatursteuerung
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            const keyActions = {
+                'ArrowUp': () => movePlayer(0, -1),
+                'ArrowDown': () => movePlayer(0, 1),
+                'ArrowLeft': () => movePlayer(-1, 0),
+                'ArrowRight': () => movePlayer(1, 0)
+            };
+
+            if (keyActions[e.key]) {
+                e.preventDefault();
+                keyActions[e.key]();
+            }
+        });
+
+        // Spieler bewegen
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            if (newX >= 0 && newX < 8 && newY >= 0 && newY < ROWS) {
+                player.x = newX;
+                player.y = newY;
+                
+                if (dy < 0) {
+                    score += 10;
+                    distanceTraveled++;
+                }
+                
+                checkCollisions();
+            }
+        }
+
+        // Level-Setup
+        function initializeLanes() {
+            lanes = [];
+            rowCounter = 0;
+            const initialRows = ROWS + 10;
+            for (let row = 0; row < initialRows; row++) {
+                generateNewLane(row);
+            }
+        }
+
+        // Neue Fahrspur generieren
+        function generateNewLane(row) {
+            rowCounter++;
+            
+            // Garantierte sichere Linie alle 14 Reihen
+            if (rowCounter % 14 === 0) {
+                lanes.push({
+                    row: row,
+                    type: 'safe',
+                    snowflakes: []
+                });
+                
+                hearts.push({
+                    x: Math.floor(Math.random() * 8),
+                    y: row,
+                    collected: false
+                });
+                return;
+            }
+            
+            // Progressive Schwierigkeit
+            const difficulty = Math.min(distanceTraveled / 50, 3);
+            const dangerChance = 0.5 + (difficulty * 0.1);
+            
+            if (Math.random() > dangerChance) {
+                lanes.push({
+                    row: row,
+                    type: 'safe',
+                    snowflakes: []
+                });
+                
+                if (Math.random() < 0.4) {
+                    hearts.push({
+                        x: Math.floor(Math.random() * 8),
+                        y: row,
+                        collected: false
+                    });
+                }
+            } else {
+                const direction = Math.random() < 0.5 ? 1 : -1;
+                const baseSpeed = 0.015 + Math.random() * 0.025;
+                const speed = baseSpeed * (1 + difficulty * 0.3);
+                const baseDensity = 2 + Math.floor(Math.random() * 3);
+                const density = Math.min(baseDensity + Math.floor(difficulty), 6);
+                
+                const snowflakes = [];
+                for (let i = 0; i < density; i++) {
+                    snowflakes.push({
+                        offset: (i * (8 / density)) + Math.random() * 2
+                    });
+                }
+                
+                lanes.push({
+                    row: row,
+                    type: 'danger',
+                    direction: direction,
+                    speed: speed,
+                    snowflakes: snowflakes
+                });
+            }
+        }
+
+        // Kollisionserkennung verbessert
+        function checkCollisions() {
+            const currentLane = lanes.find(lane => lane.row === player.y);
+            
+            if (currentLane && currentLane.type === 'danger') {
+                for (let snowflake of currentLane.snowflakes) {
+                    let snowX = snowflake.offset % 8;
+                    if (snowX < 0) snowX += 8;
+                    
+                    if (Math.abs(snowX - player.x) < 0.6) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+
+            for (let heart of hearts) {
+                if (!heart.collected && heart.x === player.x && heart.y === player.y) {
+                    heart.collected = true;
+                    score += 100;
+                }
+            }
+        }
+
+        // Zeichnen
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let lane of lanes) {
+                const screenRow = lane.row - cameraOffsetY;
+                
+                if (screenRow >= -1 && screenRow <= ROWS + 1) {
+                    ctx.fillStyle = lane.type === 'safe' 
+                        ? (lane.row % 2 === 0 ? '#e8e4df' : '#d4cfc7')
+                        : (lane.row % 2 === 0 ? '#c8c4bf' : '#b8b4af');
+                    ctx.fillRect(0, screenRow * CELL_SIZE, canvas.width, CELL_SIZE);
+                    
+                    if (lane.type === 'danger') {
+                        ctx.fillStyle = '#6b7f72';
+                        ctx.font = `${CELL_SIZE * 0.6}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        for (let snowflake of lane.snowflakes) {
+                            let snowX = snowflake.offset % 8;
+                            if (snowX < 0) snowX += 8;
+                            
+                            ctx.fillText('❄', 
+                                snowX * CELL_SIZE + CELL_SIZE / 2, 
+                                screenRow * CELL_SIZE + CELL_SIZE / 2);
+                        }
+                    }
+                }
+            }
+
+            for (let heart of hearts) {
+                if (!heart.collected) {
+                    const screenRow = heart.y - cameraOffsetY;
+                    
+                    if (screenRow >= -1 && screenRow <= ROWS + 1) {
+                        ctx.fillStyle = '#c9a961';
+                        ctx.font = `${CELL_SIZE * 0.5}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('♥', 
+                            heart.x * CELL_SIZE + CELL_SIZE / 2, 
+                            screenRow * CELL_SIZE + CELL_SIZE / 2);
+                    }
+                }
+            }
+
+            const playerScreenY = player.y - cameraOffsetY;
+            ctx.fillStyle = '#a89968';
+            ctx.font = `${CELL_SIZE * 0.8}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('♥', 
+                player.x * CELL_SIZE + CELL_SIZE / 2, 
+                playerScreenY * CELL_SIZE + CELL_SIZE / 2);
+        }
+
+        // Update-Loop
+        function update() {
+            if (!gameRunning) return;
+
+            for (let lane of lanes) {
+                if (lane.type === 'danger') {
+                    for (let snowflake of lane.snowflakes) {
+                        snowflake.offset += lane.speed * lane.direction;
+                    }
+                }
+            }
+
+            const targetRow = ROWS - Math.floor(ROWS / 3);
+            if (player.y < targetRow) {
+                targetCameraY = player.y - targetRow;
+            }
+            
+            cameraOffsetY += (targetCameraY - cameraOffsetY) * 0.15;
+
+            const topVisibleRow = Math.floor(cameraOffsetY);
+            const minExistingRow = lanes.length > 0 ? Math.min(...lanes.map(l => l.row)) : 0;
+            
+            while (minExistingRow > topVisibleRow - 5) {
+                generateNewLane(minExistingRow - 1);
+            }
+            
+            const bottomVisibleRow = Math.ceil(cameraOffsetY + ROWS);
+            lanes = lanes.filter(lane => 
+                lane.row > bottomVisibleRow - 10 && lane.row < topVisibleRow + ROWS + 10);
+            hearts = hearts.filter(heart => 
+                heart.y > bottomVisibleRow - 10 && heart.y < topVisibleRow + ROWS + 10);
+
+            checkCollisions();
+            draw();
+
+            document.getElementById('sessionScore').textContent = Math.floor(score).toLocaleString('de-DE');
+            document.getElementById('totalScore').textContent = totalScore.toLocaleString('de-DE');
+            
+            updateProgress();
+
+            requestAnimationFrame(update);
+        }
+
+        function updateProgress() {
+            const progress = Math.min((totalScore / TARGET_SCORE) * 100, 100);
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = 
+                `${totalScore.toLocaleString('de-DE')} / ${TARGET_SCORE.toLocaleString('de-DE')}`;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            const finalScore = Math.floor(score);
+            totalScore += finalScore;
+            saveTotalScore();
+
+            document.getElementById('sessionPoints').textContent = finalScore.toLocaleString('de-DE');
+            document.getElementById('totalPoints').textContent = 
+                'Gesamt: ' + totalScore.toLocaleString('de-DE');
+
+            if (totalScore >= TARGET_SCORE) {
+                document.getElementById('victory').classList.add('active');
+            } else {
+                document.getElementById('gameOver').classList.add('active');
+            }
+        }
+
+        function restartGame() {
+            updateGameDimensions();
+            player = { x: 4, y: ROWS - 2 };
+            score = 0;
+            lanes = [];
+            hearts = [];
+            gameRunning = true;
+            distanceTraveled = 0;
+            cameraOffsetY = 0;
+            targetCameraY = 0;
+            rowCounter = 0;
+
+            document.getElementById('gameOver').classList.remove('active');
+            
+            initializeLanes();
+            update();
+        }
+
+        function startGame() {
+            document.getElementById('instructions').style.display = 'none';
+            gameStarted = true;
+            restartGame();
+        }
+
+        function resetProgress() {
+            if (confirm('Möchtest du wirklich den gesamten Fortschritt zurücksetzen?')) {
+                totalScore = 0;
+                saveTotalScore();
+                updateProgress();
+                document.getElementById('totalScore').textContent = '0';
+            }
+        }
+
+        // Initialisierung
+        updateProgress();
+    </script>
+</body>
+</html>

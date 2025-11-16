@@ -36,19 +36,17 @@
             align-items: center;
         }
 
-        .reset-btn {
+        .back-btn {
             font-family: 'Raleway', sans-serif;
-            background: #8b7355;
+            background: #2d4a3e;
             color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
             font-size: 0.9em;
             cursor: pointer;
-        }
-
-        .reset-btn:hover {
-            background: #6b5845;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .stats {
@@ -85,7 +83,6 @@
             border-radius: 8px;
             max-width: 100%;
             max-height: calc(100vh - 90px);
-            cursor: pointer;
         }
 
         .game-over {
@@ -106,12 +103,6 @@
 
         .game-over.active {
             display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
 
         .game-over h2 {
@@ -144,11 +135,6 @@
             font-size: 1.1em;
             cursor: pointer;
             margin-top: 20px;
-            transition: background 0.2s;
-        }
-
-        .game-over button:hover {
-            background: #3d5a4e;
         }
 
         .victory {
@@ -260,57 +246,11 @@
             text-align: center;
             font-weight: 500;
         }
-
-        .instructions {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #d4cfc7;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            z-index: 400;
-            max-width: 90%;
-        }
-
-        .instructions h2 {
-            font-family: 'Cormorant Garamond', serif;
-            color: #2d4a3e;
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        .instructions p {
-            color: #6b7f72;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .instructions button {
-            font-family: 'Raleway', sans-serif;
-            background: #2d4a3e;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .controls-hint {
-            font-size: 0.9em;
-            color: #8b7355;
-            margin-top: 15px;
-        }
     </style>
 </head>
 <body>
     <div class="header">
-        <button class="reset-btn" onclick="resetProgress()">Fortschritt zurücksetzen</button>
+        <a href="index.html" class="back-btn">← Zurück</a>
         <div class="stats">
             <div class="stat-item">
                 <div class="stat-label">Session</div>
@@ -331,16 +271,6 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
         <div class="progress-text" id="progressText">0 / 500.000</div>
-    </div>
-
-    <div class="instructions" id="instructions">
-        <h2>Willkommen! 🎮</h2>
-        <p><strong>Ziel:</strong> Sammle 500.000 Punkte!</p>
-        <p><strong>Steuerung:</strong></p>
-        <p>🖱️ <strong>Desktop:</strong> Pfeiltasten</p>
-        <p>📱 <strong>Mobile:</strong> Wischen in gewünschte Richtung</p>
-        <p class="controls-hint">Weiche den Schneeflocken ❄ aus und sammle Herzen ♥</p>
-        <button onclick="startGame()">Spiel starten</button>
     </div>
 
     <div class="game-over" id="gameOver">
@@ -377,100 +307,73 @@
         window.addEventListener('resize', resizeCanvas);
 
         // Spielkonstanten
-        let CELL_SIZE, ROWS;
+        const CELL_SIZE = canvas.width / 8;
+        const ROWS = Math.floor(canvas.height / CELL_SIZE);
         const TARGET_SCORE = 500000;
 
-        function updateGameDimensions() {
-            CELL_SIZE = canvas.width / 8;
-            ROWS = Math.floor(canvas.height / CELL_SIZE);
-        }
-        updateGameDimensions();
-
         // Spielzustand
-        let player = { x: 4, y: 0 };
+        let player = { x: 4, y: ROWS - 2 };
         let score = 0;
-        let totalScore = 0;
-        let lanes = [];
+        let totalScore = parseInt(localStorage.getItem('totalScore') || '0');
+        let lanes = []; // Fahrspuren mit Schneeflocken
         let hearts = [];
-        let gameRunning = false;
-        let gameStarted = false;
+        let gameRunning = true;
         let distanceTraveled = 0;
-        let cameraOffsetY = 0;
+        let cameraOffsetY = 0; // Sanftes Scrolling
         let targetCameraY = 0;
-        let rowCounter = 0;
+        let rowCounter = 0; // Zähler für sichere Linien
 
-        // LocalStorage sicher laden
-        function loadTotalScore() {
-            try {
-                const saved = localStorage.getItem('henniTotalScore');
-                return saved ? parseInt(saved) : 0;
-            } catch (e) {
-                console.warn('LocalStorage nicht verfügbar:', e);
-                return 0;
-            }
-        }
-
-        function saveTotalScore() {
-            try {
-                localStorage.setItem('henniTotalScore', totalScore);
-            } catch (e) {
-                console.warn('Konnte nicht speichern:', e);
-            }
-        }
-
-        totalScore = loadTotalScore();
-
-        // Touch-Steuerung verbessert
+        // Touch-Steuerung
         let touchStartX = 0;
         let touchStartY = 0;
-        const MIN_SWIPE_DISTANCE = 40;
 
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
         }, { passive: false });
 
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             if (!gameRunning) return;
 
-            const touch = e.changedTouches[0];
-            const touchEndX = touch.clientX;
-            const touchEndY = touch.clientY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
             
             const dx = touchEndX - touchStartX;
             const dy = touchEndY - touchStartY;
             
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            
-            if (absDx > absDy && absDx > MIN_SWIPE_DISTANCE) {
-                movePlayer(dx > 0 ? 1 : -1, 0);
-            } else if (absDy > MIN_SWIPE_DISTANCE) {
-                movePlayer(0, dy < 0 ? -1 : 1);
+            // Mindestbewegung von 30px für Wischen
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+                if (dx > 0) movePlayer(1, 0); // rechts
+                else movePlayer(-1, 0); // links
+            } else if (Math.abs(dy) > 30) {
+                if (dy < 0) movePlayer(0, -1); // hoch
+                else movePlayer(0, 1); // runter
             }
         }, { passive: false });
 
-        // Tastatursteuerung
+        // Tastatursteuerung mit Pfeiltasten
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
             
-            const keyActions = {
-                'ArrowUp': () => movePlayer(0, -1),
-                'ArrowDown': () => movePlayer(0, 1),
-                'ArrowLeft': () => movePlayer(-1, 0),
-                'ArrowRight': () => movePlayer(1, 0)
-            };
-
-            if (keyActions[e.key]) {
-                e.preventDefault();
-                keyActions[e.key]();
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    movePlayer(1, 0);
+                    break;
             }
         });
 
@@ -479,10 +382,12 @@
             const newX = player.x + dx;
             const newY = player.y + dy;
 
+            // Grenzen prüfen
             if (newX >= 0 && newX < 8 && newY >= 0 && newY < ROWS) {
                 player.x = newX;
                 player.y = newY;
                 
+                // Punkte für Vorwärtsbewegung (nach oben)
                 if (dy < 0) {
                     score += 10;
                     distanceTraveled++;
@@ -492,48 +397,62 @@
             }
         }
 
-        // Level-Setup
+        // Level-Setup: Fahrspuren initialisieren
         function initializeLanes() {
             lanes = [];
-            rowCounter = 0;
-            const initialRows = ROWS + 10;
-            for (let row = 0; row < initialRows; row++) {
-                generateNewLane(row);
+            for (let row = 0; row < ROWS + 10; row++) {
+                const laneType = Math.random();
+                if (laneType < 0.3) {
+                    // Sichere Zone - keine Schneeflocken
+                    lanes.push({
+                        row: row,
+                        type: 'safe',
+                        snowflakes: []
+                    });
+                    
+                    // 20% Chance für ein Herz in sicheren Zonen
+                    if (Math.random() < 0.2) {
+                        hearts.push({
+                            x: Math.floor(Math.random() * 8),
+                            y: row,
+                            collected: false
+                        });
+                    }
+                } else {
+                    // Gefahrenzone - Schneeflocken
+                    const direction = Math.random() < 0.5 ? 1 : -1; // 1 = rechts, -1 = links
+                    const speed = 0.01 + Math.random() * 0.02; // Verschiedene Geschwindigkeiten
+                    const density = 2 + Math.floor(Math.random() * 3); // 2-4 Schneeflocken pro Reihe
+                    
+                    const snowflakes = [];
+                    for (let i = 0; i < density; i++) {
+                        snowflakes.push({
+                            offset: (i * (8 / density)) + Math.random() * 2
+                        });
+                    }
+                    
+                    lanes.push({
+                        row: row,
+                        type: 'danger',
+                        direction: direction,
+                        speed: speed,
+                        snowflakes: snowflakes
+                    });
+                }
             }
         }
 
-        // Neue Fahrspur generieren
+        // Neue Fahrspur oben generieren
         function generateNewLane(row) {
-            rowCounter++;
-            
-            // Garantierte sichere Linie alle 14 Reihen
-            if (rowCounter % 14 === 0) {
+            const laneType = Math.random();
+            if (laneType < 0.3) {
                 lanes.push({
                     row: row,
                     type: 'safe',
                     snowflakes: []
                 });
                 
-                hearts.push({
-                    x: Math.floor(Math.random() * 8),
-                    y: row,
-                    collected: false
-                });
-                return;
-            }
-            
-            // Progressive Schwierigkeit
-            const difficulty = Math.min(distanceTraveled / 50, 3);
-            const dangerChance = 0.5 + (difficulty * 0.1);
-            
-            if (Math.random() > dangerChance) {
-                lanes.push({
-                    row: row,
-                    type: 'safe',
-                    snowflakes: []
-                });
-                
-                if (Math.random() < 0.4) {
+                if (Math.random() < 0.2) {
                     hearts.push({
                         x: Math.floor(Math.random() * 8),
                         y: row,
@@ -542,10 +461,8 @@
                 }
             } else {
                 const direction = Math.random() < 0.5 ? 1 : -1;
-                const baseSpeed = 0.015 + Math.random() * 0.025;
-                const speed = baseSpeed * (1 + difficulty * 0.3);
-                const baseDensity = 2 + Math.floor(Math.random() * 3);
-                const density = Math.min(baseDensity + Math.floor(difficulty), 6);
+                const speed = 0.01 + Math.random() * 0.02;
+                const density = 2 + Math.floor(Math.random() * 3);
                 
                 const snowflakes = [];
                 for (let i = 0; i < density; i++) {
@@ -564,8 +481,9 @@
             }
         }
 
-        // Kollisionserkennung verbessert
+        // Kollisionserkennung
         function checkCollisions() {
+            // Schneeflocken-Kollision prüfen
             const currentLane = lanes.find(lane => lane.row === player.y);
             
             if (currentLane && currentLane.type === 'danger') {
@@ -573,6 +491,7 @@
                     let snowX = snowflake.offset % 8;
                     if (snowX < 0) snowX += 8;
                     
+                    // Kollision mit etwas Toleranz
                     if (Math.abs(snowX - player.x) < 0.6) {
                         gameOver();
                         return;
@@ -580,6 +499,7 @@
                 }
             }
 
+            // Herzen einsammeln
             for (let heart of hearts) {
                 if (!heart.collected && heart.x === player.x && heart.y === player.y) {
                     heart.collected = true;
@@ -592,63 +512,57 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            for (let lane of lanes) {
-                const screenRow = lane.row - cameraOffsetY;
+            // Straßen und Fahrspuren zeichnen
+            for (let row = 0; row < ROWS; row++) {
+                const lane = lanes.find(l => l.row === row);
                 
-                if (screenRow >= -1 && screenRow <= ROWS + 1) {
-                    ctx.fillStyle = lane.type === 'safe' 
-                        ? (lane.row % 2 === 0 ? '#e8e4df' : '#d4cfc7')
-                        : (lane.row % 2 === 0 ? '#c8c4bf' : '#b8b4af');
-                    ctx.fillRect(0, screenRow * CELL_SIZE, canvas.width, CELL_SIZE);
+                if (lane) {
+                    // Hintergrund je nach Typ
+                    if (lane.type === 'safe') {
+                        ctx.fillStyle = row % 2 === 0 ? '#e8e4df' : '#d4cfc7';
+                    } else {
+                        ctx.fillStyle = row % 2 === 0 ? '#c8c4bf' : '#b8b4af';
+                    }
+                    ctx.fillRect(0, row * CELL_SIZE, canvas.width, CELL_SIZE);
                     
+                    // Schneeflocken zeichnen
                     if (lane.type === 'danger') {
                         ctx.fillStyle = '#6b7f72';
                         ctx.font = `${CELL_SIZE * 0.6}px Arial`;
                         ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
                         
                         for (let snowflake of lane.snowflakes) {
                             let snowX = snowflake.offset % 8;
                             if (snowX < 0) snowX += 8;
                             
-                            ctx.fillText('❄', 
-                                snowX * CELL_SIZE + CELL_SIZE / 2, 
-                                screenRow * CELL_SIZE + CELL_SIZE / 2);
+                            ctx.fillText('❄', snowX * CELL_SIZE + CELL_SIZE / 2, row * CELL_SIZE + CELL_SIZE * 0.7);
                         }
                     }
                 }
             }
 
+            // Herzen zeichnen
             for (let heart of hearts) {
-                if (!heart.collected) {
-                    const screenRow = heart.y - cameraOffsetY;
-                    
-                    if (screenRow >= -1 && screenRow <= ROWS + 1) {
-                        ctx.fillStyle = '#c9a961';
-                        ctx.font = `${CELL_SIZE * 0.5}px Arial`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('♥', 
-                            heart.x * CELL_SIZE + CELL_SIZE / 2, 
-                            screenRow * CELL_SIZE + CELL_SIZE / 2);
-                    }
+                if (!heart.collected && heart.y >= 0 && heart.y < ROWS) {
+                    ctx.fillStyle = '#c9a961';
+                    ctx.font = `${CELL_SIZE * 0.5}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('♥', heart.x * CELL_SIZE + CELL_SIZE / 2, heart.y * CELL_SIZE + CELL_SIZE * 0.65);
                 }
             }
 
-            const playerScreenY = player.y - cameraOffsetY;
+            // Spieler zeichnen (größer und auffälliger)
             ctx.fillStyle = '#a89968';
             ctx.font = `${CELL_SIZE * 0.8}px Arial`;
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('♥', 
-                player.x * CELL_SIZE + CELL_SIZE / 2, 
-                playerScreenY * CELL_SIZE + CELL_SIZE / 2);
+            ctx.fillText('♥', player.x * CELL_SIZE + CELL_SIZE / 2, player.y * CELL_SIZE + CELL_SIZE * 0.75);
         }
 
-        // Update-Loop
+        // Update
         function update() {
             if (!gameRunning) return;
 
+            // Schneeflocken bewegen
             for (let lane of lanes) {
                 if (lane.type === 'danger') {
                     for (let snowflake of lane.snowflakes) {
@@ -657,53 +571,60 @@
                 }
             }
 
-            const targetRow = ROWS - Math.floor(ROWS / 3);
-            if (player.y < targetRow) {
-                targetCameraY = player.y - targetRow;
+            // Wenn Spieler oben ankommt, Welt nach unten verschieben
+            if (player.y < ROWS / 3) {
+                // Spieler in der Mitte halten
+                player.y++;
+                
+                // Alle Fahrspuren nach unten verschieben
+                for (let lane of lanes) {
+                    lane.row++;
+                }
+                
+                // Alle Herzen nach unten verschieben
+                for (let heart of hearts) {
+                    heart.y++;
+                }
+                
+                // Alte Fahrspuren entfernen
+                lanes = lanes.filter(lane => lane.row < ROWS + 10);
+                hearts = hearts.filter(heart => heart.y < ROWS + 10);
+                
+                // Neue Fahrspur oben hinzufügen
+                const minRow = Math.min(...lanes.map(l => l.row));
+                generateNewLane(minRow - 1);
             }
-            
-            cameraOffsetY += (targetCameraY - cameraOffsetY) * 0.15;
-
-            const topVisibleRow = Math.floor(cameraOffsetY);
-            const minExistingRow = lanes.length > 0 ? Math.min(...lanes.map(l => l.row)) : 0;
-            
-            while (minExistingRow > topVisibleRow - 5) {
-                generateNewLane(minExistingRow - 1);
-            }
-            
-            const bottomVisibleRow = Math.ceil(cameraOffsetY + ROWS);
-            lanes = lanes.filter(lane => 
-                lane.row > bottomVisibleRow - 10 && lane.row < topVisibleRow + ROWS + 10);
-            hearts = hearts.filter(heart => 
-                heart.y > bottomVisibleRow - 10 && heart.y < topVisibleRow + ROWS + 10);
 
             checkCollisions();
             draw();
 
-            document.getElementById('sessionScore').textContent = Math.floor(score).toLocaleString('de-DE');
-            document.getElementById('totalScore').textContent = totalScore.toLocaleString('de-DE');
+            // UI Update
+            document.getElementById('sessionScore').textContent = Math.floor(score).toLocaleString();
+            document.getElementById('totalScore').textContent = totalScore.toLocaleString();
             
             updateProgress();
 
             requestAnimationFrame(update);
         }
 
+        // Fortschritt aktualisieren
         function updateProgress() {
             const progress = Math.min((totalScore / TARGET_SCORE) * 100, 100);
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('progressText').textContent = 
-                `${totalScore.toLocaleString('de-DE')} / ${TARGET_SCORE.toLocaleString('de-DE')}`;
+                `${totalScore.toLocaleString()} / ${TARGET_SCORE.toLocaleString()}`;
         }
 
+        // Game Over
         function gameOver() {
             gameRunning = false;
             const finalScore = Math.floor(score);
             totalScore += finalScore;
-            saveTotalScore();
+            localStorage.setItem('totalScore', totalScore);
 
-            document.getElementById('sessionPoints').textContent = finalScore.toLocaleString('de-DE');
+            document.getElementById('sessionPoints').textContent = finalScore.toLocaleString();
             document.getElementById('totalPoints').textContent = 
-                'Gesamt: ' + totalScore.toLocaleString('de-DE');
+                'Gesamt: ' + totalScore.toLocaleString();
 
             if (totalScore >= TARGET_SCORE) {
                 document.getElementById('victory').classList.add('active');
@@ -712,17 +633,14 @@
             }
         }
 
+        // Neustart
         function restartGame() {
-            updateGameDimensions();
             player = { x: 4, y: ROWS - 2 };
             score = 0;
             lanes = [];
             hearts = [];
             gameRunning = true;
             distanceTraveled = 0;
-            cameraOffsetY = 0;
-            targetCameraY = 0;
-            rowCounter = 0;
 
             document.getElementById('gameOver').classList.remove('active');
             
@@ -730,23 +648,10 @@
             update();
         }
 
-        function startGame() {
-            document.getElementById('instructions').style.display = 'none';
-            gameStarted = true;
-            restartGame();
-        }
-
-        function resetProgress() {
-            if (confirm('Möchtest du wirklich den gesamten Fortschritt zurücksetzen?')) {
-                totalScore = 0;
-                saveTotalScore();
-                updateProgress();
-                document.getElementById('totalScore').textContent = '0';
-            }
-        }
-
-        // Initialisierung
+        // Start 
         updateProgress();
+        initializeLanes();
+        update();
     </script>
 </body>
 </html>

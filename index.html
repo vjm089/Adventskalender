@@ -638,15 +638,11 @@
         }
 
         function getCurrentDay() {
-            // TESTMODUS: Alle Türchen freigeschaltet
+           const now = new Date();
+            if (now.getMonth() === 11 && now.getDate() <= 24) {
+                return now.getDate();
+            }
             return 0;
-            
-            // Für den echten Kalender später auskommentieren und folgendes verwenden:
-            // const now = new Date();
-            // if (now.getMonth() === 11 && now.getDate() <= 24) {
-            //     return now.getDate();
-            // }
-            // return 0;
         }
 
         function createCalendar() {

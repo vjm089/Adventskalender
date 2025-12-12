@@ -549,12 +549,6 @@
                 songUrl: 'https://www.youtube.com/watch?v=-BjZmE2gtdo',
                 songName: 'Überraschung'
             },
-            16: {
-                type: 'image',
-                title: 'Tag 16',
-                text: 'Weil heute dein Geburtstag ist bekommst du natürlich was. Nur was gute frage.',
-                imageUrl: 'bilder/foto4.jpg'
-            },
             17: {
                 type: 'message',
                 title: 'Tag 17',
@@ -696,9 +690,16 @@
                 localStorage.setItem('openedDoors', JSON.stringify(openedDoors));
             }
 
-            setTimeout(() => {
-                showContent(day);
-            }, 400);
+            // Special handling for day 16 - redirect to letter page
+            if (day === 16) {
+                setTimeout(() => {
+                    window.location.href = 'brief.html';
+                }, 400);
+            } else {
+                setTimeout(() => {
+                    showContent(day);
+                }, 400);
+            }
 
             event.currentTarget.classList.remove('available');
             event.currentTarget.classList.add('opened');

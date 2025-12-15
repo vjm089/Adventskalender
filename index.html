@@ -349,6 +349,74 @@
             font-weight: 300;
         }
 
+        .games-section {
+            margin-top: 60px;
+            padding-top: 60px;
+            border-top: 1px solid #d4cfc7;
+        }
+
+        .games-title {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+
+        .games-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .game-box {
+            background: #ffffff;
+            border: 1px solid #d4cfc7;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(45, 74, 62, 0.2);
+            border-color: #a89968;
+        }
+
+        .game-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+        }
+
+        .game-name {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 1.5em;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            font-family: 'Raleway', sans-serif;
+            color: #6b7f72;
+            font-size: 0.9em;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2em;
@@ -369,6 +437,10 @@
                 padding: 40px 30px;
             }
             .countdown-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .games-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
@@ -449,6 +521,26 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="games-section">
+            <h2 class="games-title">SPIELE</h2>
+            <div class="games-container">
+                <a href="2048.html" class="game-box">
+                    <div class="game-icon">🕹️</div>
+                    <div class="game-name">2048</div>
+                </a>
+
+                <a href="snake.html" class="game-box">
+                    <div class="game-icon">🐍</div>
+                    <div class="game-name">Snake</div>
+                </a>
+
+                <a href="spiel.html" class="game-box">
+                    <div class="game-icon">❤️</div>
+                    <div class="game-name">Herzchen-Spiel</div>
+                </a>
             </div>
         </div>
     </div>

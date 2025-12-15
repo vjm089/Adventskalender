@@ -469,23 +469,22 @@
       const winnerSymbol = document.getElementById('winnerSymbol');
       
       if (result === 'draw') {
-        document.getElementById('resultTitle').textContent = 'Unentschieden, schade aber nochmal';
+        document.getElementById('resultTitle').textContent = 'Unentschieden';
         document.getElementById('resultMessage').innerHTML = 
-          'Kein Gewinner! Gut gespielt!';
+          'Kein Gewinner wie nervig also noch mal bitte :)';
         winnerSymbol.style.display = 'none';
         draws++;
       } else if (result === 'X') {
-        document.getElementById('resultTitle').textContent = 'Spieler 1 hat gewonnen';
+        document.getElementById('resultTitle').textContent = 'Spieler mit X hat gewonnen';
         document.getElementById('resultMessage').innerHTML = 
-          'Glückwunsch <strong>Spieler 1 (✕)</strong>!';
-        winnerSymbol.textContent = '✕';
+        winnerSymbol.textContent = '';
         winnerSymbol.style.display = 'block';
         wins++;
       } else {
-        document.getElementById('resultTitle').textContent = 'Spiele 2 hat gewonnen ';
+        document.getElementById('resultTitle').textContent = 'Spiele mit O hat gewonnen ';
         document.getElementById('resultMessage').innerHTML = 
-          'Glückwunsch <strong>Spieler 2 (○)</strong>!';
-        winnerSymbol.textContent = '○';
+
+        winnerSymbol.textContent = '';
         winnerSymbol.style.display = 'block';
         losses++;
       }

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alles Gute zum Geburtstag 💕</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: linear-gradient(to bottom, #f8f6f4 0%, #e8e4df 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 1;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8em;
+            animation: fall linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #6b7f72;
+            background: #ffffff;
+            border: 1px solid #d4cfc7;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-btn:hover {
+            background: #f5f3f0;
+            color: #2d4a3e;
+            transform: scale(1.05);
+        }
+
+        .letter-container {
+            perspective: 1500px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .letter {
+            background: #ffffff;
+            border: 1px solid #d4cfc7;
+            border-radius: 12px;
+            padding: 60px 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+            transform-origin: top;
+            animation: unfold 1.5s ease-out forwards;
+        }
+
+        @keyframes unfold {
+            0% {
+                transform: rotateX(-90deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        .letter-header {
+            font-family: 'Cormorant Garamond', serif;
+            color: #2d4a3e;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+
+        .letter-date {
+            font-family: 'Raleway', sans-serif;
+            color: #6b7f72;
+            font-size: 0.9em;
+            text-align: right;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .letter-greeting {
+            font-family: 'Raleway', sans-serif;
+            color: #2d4a3e;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            font-weight: 400;
+        }
+
+        .letter-body {
+            font-family: 'Raleway', sans-serif;
+            color: #4a4a4a;
+            font-size: 1.05em;
+            line-height: 1.9;
+            text-align: left;
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        .letter-signature {
+            font-family: 'Raleway', sans-serif;
+            color: #2d4a3e;
+            font-size: 1.1em;
+            text-align: right;
+            font-weight: 400;
+            margin-top: 30px;
+        }
+
+        .heart-decoration {
+            text-align: center;
+            font-size: 1.5em;
+            color: #a89968;
+            margin: 30px 0;
+            opacity: 0;
+            animation: fadeIn 1s ease-in 1.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .floating-hearts {
+            position: fixed;
+            font-size: 1.5em;
+            color: #a89968;
+            pointer-events: none;
+            z-index: 999;
+            animation: floatUp 4s ease-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .letter {
+                padding: 40px 30px;
+            }
+
+            .letter-header {
+                font-size: 1.8em;
+            }
+
+            .letter-body {
+                font-size: 1em;
+            }
+
+            .close-btn {
+                top: 20px;
+                left: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="close-btn">←</a>
+
+    <div class="letter-container">
+        <div class="letter">
+            
+            
+            <div class="letter-greeting">Liebe Henni,</div>
+            
+            <div class="letter-body">
+                ich hoffe du bekommst heute ganz ganz viele Geschenke und alles was du haben willst. Ich finde das sooooooooooo krass wir haben uns kennengelernt als wir einfach 15 und 17 waren und jetzt bist du einfach 18 ♥<br><br>
+                
+                Ich freu mich schon sooooo dolle wenn du mich einfach morgens dann zum Bäcker alleine fahren kannst und wir alles einfach jetzt machen könnten was wir wollen. Ich bin sooooo sehr stolz auf dich Henni.<br><br>
+                
+                Wie du bist und alles, du bist echt eine soooooo tolle Person wie sonst niemand anders. Ich liebe wie liebevoll und ehrlich du immer bist, egal was. Du bist echt die perfekteste Freundin der ganzen Welt. Ich bin sooooooo unendlich dankbar mit dir zusammen zu sein das ist das aller beste was  mir jemals hätte passieren können. ♥<br><br>
+                
+                Du bist die aller schönste und süßeste und hübscheste und heißeste und einfach alles Freundin die es gibt ♥. Ich kann gar nicht beschreiben wie unendlich toll ich dich finde einfach alles alles alles alles du bist sooooooo unendllich perfekt henrike.
+
+                
+                
+                Ich hoffe du hast heute jetzt ein ganz schönen Tag und ich freue mich schon soooooooooo dolle dich in ein ganz paar tagen zu sehen das wird sooooooo toll henni ♥
+            </div>
+
+            <div class="heart-decoration">♥ ♥ ♥</div>
+            
+            <div class="letter-signature">
+                Ich hab dich ganz ganz dolle lieb mein Henni Schmenni, ♥<br>
+                Dein Vali
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createSnowflakes() {
+            setInterval(() => {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.innerHTML = '❄';
+                snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.opacity = Math.random() * 0.5;
+                snowflake.style.fontSize = (Math.random() * 8 + 8) + 'px';
+                document.body.appendChild(snowflake);
+
+                setTimeout(() => {
+                    snowflake.remove();
+                }, 5000);
+            }, 300);
+        }
+
+        function createFloatingHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('floating-hearts');
+                heart.innerHTML = '♥';
+                heart.style.left = Math.random() * window.innerWidth + 'px';
+                heart.style.bottom = '0px';
+                heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                heart.style.animationDelay = (Math.random() * 2) + 's';
+                document.body.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }, 800);
+        }
+
+        createSnowflakes();
+        createFloatingHearts();
+    </script>
+</body>
+</html>
